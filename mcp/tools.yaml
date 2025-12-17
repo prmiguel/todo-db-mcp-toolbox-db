@@ -1,0 +1,29 @@
+sources:
+  todo-source:
+    kind: postgres
+    host: db
+    port: 5432
+    database: todo
+    user: postgres
+    password: password
+tools:
+  list-todos:
+    kind: postgres-sql
+    source: todo-source
+    description: List all todos.
+    statement: |
+      SELECT * FROM todos;
+  search-todo-by-title:
+    kind: postgres-sql
+    source: todo-source
+    description: Search for todos based on title.
+    parameters:
+      - name: title
+        type: string
+        description: The title of the todo.
+    statement: |
+      SELECT * FROM todos WHERE title = $1;
+toolsets:
+  todosset:
+    - list-todos
+    - search-todo-by-title
