@@ -23,7 +23,18 @@ tools:
         description: The title of the todo.
     statement: |
       SELECT * FROM todos WHERE title = $1;
+  complete-todo-by-title:
+    kind: postgres-sql
+    source: todo-source
+    description: Mark a todo as completed by title.
+    parameters:
+      - name: title
+        type: string
+        description: The title of the todo to mark as completed.
+    statement: |
+      UPDATE todos SET completed = true WHERE title = $1 RETURNING *;
 toolsets:
   todosset:
     - list-todos
     - search-todo-by-title
+    - complete-todo-by-title
