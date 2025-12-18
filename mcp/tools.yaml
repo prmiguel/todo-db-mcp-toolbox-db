@@ -12,7 +12,10 @@ tools:
     source: todo-source
     description: List all todos.
     statement: |
-      SELECT * FROM todos;
+      SELECT json_agg(row_to_json(t)) AS json_result
+      FROM (
+        SELECT * FROM todos
+        ) t;
   search-todo-by-title:
     kind: postgres-sql
     source: todo-source
