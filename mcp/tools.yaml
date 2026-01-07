@@ -25,7 +25,22 @@ tools:
         type: string
         description: The title of the todo.
     statement: |
-      SELECT * FROM todos WHERE title = $1;
+      SELECT json_agg(row_to_json(t)) AS json_result
+      FROM (
+        SELECT * FROM todos WHERE title ILIKE '%' || $1 || '%'
+      ) t;
+  add-todo:
+    kind: postgres-sql
+    source: todo-source
+    description: Add a new todo item.
+    parameters:
+      - name: title
+        type: string
+        description: The title of the todo to add.
+    statement: |
+      INSERT INTO todos (id, completed, "order", title)
+      VALUES (gen_random_uuid(), false, 0, $1)
+      RETURNING *;
   complete-todo-by-title:
     kind: postgres-sql
     source: todo-source
@@ -36,8 +51,16 @@ tools:
         description: The title of the todo to mark as completed.
     statement: |
       UPDATE todos SET completed = true WHERE title = $1 RETURNING *;
+  delete-completed-todos:
+    kind: postgres-sql
+    source: todo-source
+    description: Delete all completed todos.
+    statement: |
+      DELETE FROM todos WHERE completed = true RETURNING *;
 toolsets:
   todosset:
     - list-todos
     - search-todo-by-title
+    - add-todo
     - complete-todo-by-title
+    - delete-completed-todos
